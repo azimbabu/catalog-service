@@ -7,9 +7,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("integration")
 class CatalogServiceApplicationTests {
 
   @Autowired
@@ -18,7 +20,7 @@ class CatalogServiceApplicationTests {
   @Test
   void whenGetRequestWithIdThenBookReturned() {
     var isbn = "1231231230";
-    var bookToCreate = new Book(isbn, "Title", "Author", 9.90);
+    var bookToCreate = Book.of(isbn, "Title", "Author", 9.90);
     Book expectedBook = webTestClient
         .post()
         .uri("/books")
@@ -42,7 +44,7 @@ class CatalogServiceApplicationTests {
 
   @Test
   void whenPostRequestThenBookCreated() {
-    var expectedBook = new Book("1231231231", "Title", "Author", 9.90);
+    var expectedBook = Book.of("1231231231", "Title", "Author", 9.90);
     webTestClient
         .post()
         .uri("/books")
@@ -58,7 +60,7 @@ class CatalogServiceApplicationTests {
   @Test
   void whenPutRequestThenBookUpdated() {
     var isbn = "1231231232";
-    var bookToCreate = new Book(isbn, "Title", "Author", 9.90);
+    var bookToCreate = Book.of(isbn, "Title", "Author", 9.90);
 
     Book createdBook = webTestClient
         .post()
@@ -69,8 +71,9 @@ class CatalogServiceApplicationTests {
         .expectBody(Book.class).value(book -> assertThat(book).isNotNull())
         .returnResult().getResponseBody();
 
-    var bookToUpdate = new Book(createdBook.isbn(), createdBook.title(), createdBook.author(),
-        7.75);
+    var bookToUpdate = new Book(createdBook.id(), createdBook.isbn(), createdBook.title(),
+        createdBook.author(),
+        7.75, createdBook.createdDate(), createdBook.lastModifiedDate(), createdBook.version());
 
     webTestClient
         .put()
@@ -87,7 +90,7 @@ class CatalogServiceApplicationTests {
   @Test
   void whenDeleteRequestThenBookDeleted() {
     var isbn = "1231231233";
-    var bookToCreate = new Book(isbn, "Title", "Author", 9.90);
+    var bookToCreate = Book.of(isbn, "Title", "Author", 9.90);
 
     webTestClient
         .post()
