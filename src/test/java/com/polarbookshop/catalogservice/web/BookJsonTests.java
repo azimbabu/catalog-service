@@ -19,7 +19,7 @@ public class BookJsonTests {
   @Test
   void testSerialize() throws IOException {
     var now = Instant.now();
-    var book = new Book(394L, "1234567890", "Title", "Author", 9.90, now, now, 21);
+    var book = new Book(394L, "1234567890", "Title", "Author", 9.90, "Polarsophia", now, now, 21);
     var jsonContent = json.write(book);
     assertThat(jsonContent).extractingJsonPathNumberValue("@.id")
         .isEqualTo(book.id().intValue());
@@ -31,6 +31,8 @@ public class BookJsonTests {
         .isEqualTo(book.author());
     assertThat(jsonContent).extractingJsonPathNumberValue("@.price")
         .isEqualTo(book.price());
+    assertThat(jsonContent).extractingJsonPathStringValue("@.publisher")
+        .isEqualTo(book.publisher());
     assertThat(jsonContent).extractingJsonPathNumberValue("@.version")
         .isEqualTo(book.version());
   }
@@ -45,6 +47,7 @@ public class BookJsonTests {
           "title": "Title",
           "author": "Author",
           "price": 9.90,
+          "publisher": "Polarsophia",
           "version": 21,
           "createdDate": "2023-05-07T04:42:25.276130Z",
           "lastModifiedDate": "2023-05-07T04:42:25.276130Z"
@@ -52,6 +55,8 @@ public class BookJsonTests {
         """;
     assertThat(json.parse(content))
         .usingRecursiveComparison()
-        .isEqualTo(new Book(394L, "1234567890", "Title", "Author", 9.90, instant, instant, 21));
+        .isEqualTo(
+            new Book(394L, "1234567890", "Title", "Author", 9.90, "Polarsophia", instant, instant,
+                21));
   }
 }
