@@ -20,7 +20,8 @@ public class SecurityConfig {
   SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
     return httpSecurity
         .authorizeHttpRequests(
-            matcherRegistry -> matcherRegistry.requestMatchers(HttpMethod.GET, "/", "/books/**")
+            matcherRegistry -> matcherRegistry.requestMatchers("/actuator/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/", "/books/**")
                 .permitAll()
                 .anyRequest().hasRole("employee")
         )

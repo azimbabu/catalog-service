@@ -13,6 +13,10 @@ spec:
     metadata:
       labels:
         app: catalog-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /actuator/prometheus
+        prometheus.io/port: "9001"
     spec:
       containers:
         - name: catalog-service
@@ -27,11 +31,35 @@ spec:
           env:
             - name: BPL_JVM_THREAD_COUNT
               value: "50"
-            - name: SPRING_CLOUD_CONFIG_URI
-              value: http://config-service
-            - name: SPRING_DATASOURCE_URL
-              value: jdbc:postgresql://polar-postgres/polardb_catalog
             - name: SPRING_PROFILES_ACTIVE
               value: testdata
-            - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI
-              value: http://polar-keycloak/realms/PolarBookshop
+#            - name: SPRING_CLOUD_CONFIG_URI
+#              value: http://config-service
+#            - name: SPRING_DATASOURCE_URL
+#              value: jdbc:postgresql://polar-postgres/polardb_catalog
+#            - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI
+#              value: http://polar-keycloak/realms/PolarBookshop
+          livenessProbe:
+            httpGet:
+              port: 9001
+              path: /actuator/health/liveness
+              # Increase the initial delay and add failure threshold to allow
+              # the application more time to start and get ready to accept requests.
+              # This is needed for M1 mac until ARM64 support is part of Paketo Buildpacks.
+#            initialDelaySeconds: 10
+            initialDelaySeconds: 60 # Higher value is only needed for M1 mac
+            periodSeconds: 5
+            failureThreshold: 5 # Only needed for M1 mac
+          readinessProbe:
+            httpGet:
+              port: 9001
+              path: /actuator/health/readiness
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          volumeMounts:
+            - mountPath: /workspace/config
+              name: catalog-config-volume
+      volumes:
+        - name: catalog-config-volume
+          configMap:
+            name: catalog-config
