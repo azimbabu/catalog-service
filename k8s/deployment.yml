@@ -47,9 +47,9 @@ spec:
               # the application more time to start and get ready to accept requests.
               # This is needed for M1 mac until ARM64 support is part of Paketo Buildpacks.
 #            initialDelaySeconds: 10
-            initialDelaySeconds: 60 # Higher value is only needed for M1 mac
+            initialDelaySeconds: 90 # Higher value is only needed for M1 mac
             periodSeconds: 5
-            failureThreshold: 5 # Only needed for M1 mac
+            failureThreshold: 10 # Only needed for M1 mac
           readinessProbe:
             httpGet:
               port: 9001
